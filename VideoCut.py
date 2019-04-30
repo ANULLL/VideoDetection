@@ -2,10 +2,7 @@ import cv2
 import matplotlib.pyplot as plt
 import os
 import datetime as dt
-try:
-    from pathlib import Path
-except ImportError:             # Python 2
-    from pathlib2 import Path
+from pathlib import Path
 def correct_time(time): # добавляем секунду каждому кадру и корректируем остальное время
     h =time.hour
     m=time.minute
@@ -51,10 +48,14 @@ for file in videos:
     i=0
     print(file)
     idplace,date,num_file=parser_date(file)
-    print(idplace+'_'+str(date))
+    print(idplace+str(date))
     num_dir=num_file=parser_time(num_file)
+    num_dir=str(num_dir)
+    num_dir=num_dir.replace(':','.')
     vidcap = cv2.VideoCapture(file)
     success, image = vidcap.read()
+    fps=int(vidcap.get(cv2.CAP_PROP_FPS))
+    print(fps)
     success = True
     # определим имя директории, которую создаём
     path = 'frames{id}'.format(id='.'+idplace+str(date)+'_'+str(num_dir))
@@ -66,15 +67,13 @@ for file in videos:
     else:
         print("Успешно создана директория %s " % path)
     while success:
-        vidcap.set(cv2.CAP_PROP_POS_MSEC, i*1000)
+        vidcap.set(cv2.CAP_PROP_POS_FRAMES, i*fps)
         success, image = vidcap.read()
         print('Read a new frame: ', success)
           # save frame as JPEG file
-        cv2.imwrite('frames{id}/frame{time}.jpg'.format(id='.'+idplace+str(date)+'_'+str(num_dir),time='_'+idplace+str(date)+'_'+str(num_file)), image)
-
-        #count += 1
-            #plt.imshow(image)
-            #plt.show()
+        n_file = str(num_file)
+        n_file = n_file.replace(':', '.')
+        cv2.imwrite('frames{id}/frame{time}.jpg'.format(id='.'+idplace+str(date)+'_'+str(num_dir),time='_'+idplace+str(date)+'_'+str(n_file)), image)
         i+=1
         num_file = correct_time(num_file)
 

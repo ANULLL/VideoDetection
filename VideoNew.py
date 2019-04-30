@@ -3,10 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import datetime as dt
-try:
-    from pathlib import Path
-except ImportError:             # Python 2
-    from pathlib2 import Path
+
+from pathlib import Path
+
 def parser_time(f):
     i=f.find('_')+1
     j=len(f)
@@ -51,6 +50,8 @@ for file in pictures:
     capSize = (height,width) # this is the size of my source video
     fourcc = cv2.VideoWriter_fourcc(*'m', 'p', '4', 'v') # note the lower case
     vout = cv2.VideoWriter()
+    num_dir = str(num_dir)
+    num_dir = num_dir.replace(':', '.')
     success = vout.open('{id}.avi'.format(id=idplace+str(date)+'_'+str(num_dir)),fourcc,fps,capSize,True)
     _=[vout.write(i) for i in imgs]
     print("Видео файл успешно создан")

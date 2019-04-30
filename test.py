@@ -6,10 +6,8 @@ import datetime as dt
 import matplotlib.pylab as plt
 import csv
 #import VideoCut
-try:
-    from pathlib import Path
-except ImportError:             # Python 2
-    from pathlib2 import Path
+from pathlib import Path
+
 def correct_time(time): # добавляем секунду каждому кадру и корректируем остальное время
     h =time.hour
     m=time.minute
@@ -85,27 +83,52 @@ def get_images(place):
         imgs = [cv2.imread(str(f)) for f in p.glob('*.jpg')]
     return imgs,file_first
 
-model = YOLO()
+
 #img = Image.open("/Users/maksimpolakov/PycharmProjects/untitled/venv/VideoDetection-master/frame_placeid_2019-04-05_09:25:17.jpg")
 ##изображение
-place="placeid2"
-images,first=get_images(place)
+place="Cam4"
+#images,first=get_images(place)
+directory = Path.cwd()
+files = os.listdir(directory)
+pictures = filter(lambda x: x.startswith('frames.'+place), files)
+count=0
+for file in pictures:
+    if count==0 :
+        first=file
+        break
 idplace,date,num_file=parser_date(first)
 num_dir=num_file=parser_time(num_file)
+print(first)
 FILENAME = "{id}.csv".format(id=first)
 PredictSet=list()
-for i in range(0,len(images)):
-    try:
-        img=Image.fromarray(images[i])
-    except AttributeError:
-        break
-    out = model.detect_image(img)
-    detect=get_client(out)
-    print(detect)
-    idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
-    idplace = idplace.replace('_', '')
-    PredictSet.append([idplace,date,num_file,detect])
-    num_file = correct_time(num_file)
+model = YOLO()
+happy=True
+#for i in range(0,len(images)):
+#while(happy):
+    #print(happy)
+
+    #for file in pictures:
+        #print(happy)
+p = (str(directory) + '/' + file)
+p = Path(p)
+print(p)
+for f in p.glob('*.jpg'):
+
+
+        try:
+            imgs = cv2.imread(str(f))
+            #print(imgs)
+            img=Image.fromarray(imgs)
+        except AttributeError:
+                happy=False
+                break
+        out = model.detect_image(img)
+        detect=get_client(out)
+        print(detect)
+        idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
+        idplace = idplace.replace('_', '')
+        PredictSet.append([idplace,date,num_file,detect])
+        num_file = correct_time(num_file)
 model.close_session()
 with open(FILENAME, "w", newline="") as file:
     writer = csv.writer(file)

@@ -1,10 +1,8 @@
 import csv
 import datetime as dt
 import os
-try:
-    from pathlib import Path
-except ImportError:             # Python 2
-    from pathlib2 import Path
+from pathlib import Path
+
 def parser_date(f):
     i = f.find('_') + 1
     j = len(f)
@@ -67,18 +65,18 @@ for file in textFiles:
                 minute=time.minute
                 countT=0
                 countF=0
-    print("All ", int((countF + countT) * 20 / 100) + 1)
-    print("true ", countT)
-    if (int((countF + countT) * 20 / 100) + 1 < countT):
-        pred = True
-    else:
-        pred = False
-    print(countF, " + ", countT)
-    DataSet.append([row[0], row[1], str(time.hour) + ':' + str(time.minute), pred])
+    #print("All ", int((countF + countT) * 10 / 100) + 1)
+    #print("true ", countT)
+    #if (int((countF + countT) * 20 / 100) + 1 < countT):
+    #    pred = True
+    #else:
+    #   pred = False
+    #print(countF, " + ", countT)
+    #DataSet.append([row[0], row[1], str(time.hour) + ':' + str(time.minute), pred])
     idplace, date, num_file = parser_date(file_first)
     idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
     idplace = idplace.replace('_', '')
-    FILENAME = "{id}.csv".format(id=idplace+'_'+str(date)+'_'+str(time.hour)+':'+str(time.minute))
+    FILENAME = "{id}.csv".format(id=idplace+'_'+str(date)+'_'+str(time.hour)+'.'+str(time.minute))
     with open(FILENAME, "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerows(DataSet)
