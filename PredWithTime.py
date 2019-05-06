@@ -1,22 +1,3 @@
-from yolo import YOLO
-from PIL import Image,ImageOps
-import os
-import cv2
-import datetime as dt
-import csv
-from pathlib import Path
-import pytesseract
-pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
-def parser_date(f):
-    i = f.find('_') + 1
-    j = len(f)
-    idplace=f[0:i:1]
-    data = f[i:j:1]
-    year=data[0:4:1]
-    month=data[5:7:1]
-    day=data[8:10:1]
-    d = dt.date(int(year),int(month),int(day))
-    return idplace,d,data
 def get_client (pred):
     count=0
     i=0
@@ -28,71 +9,64 @@ def get_client (pred):
         return True #клиент/клиенты есть в кадре
     else :
         return False # в кадре только оператор или нет людей
-def get_datetime (img):
-    im = img
-    im = ImageOps.invert(im)
-    im = im.convert("P")
-    im2 = Image.new("P", im.size, 255)
+def parser_csv (f):
+    i = f.find('_') + 1
+    j = len(f)
+    idplace = f[0:i-1:1]
+    data = f[i:j:1]
+    time=data[0:8:1]
+    data=data[9:len(data):1]
+    return idplace,data,time
+def main():
+    from cv2 import imread
+    from yolo import YOLO
+    from os import listdir
+    from pathlib import Path
+    from csv import writer
+    from PIL import Image
+    model = YOLO()
+    # place="9013-423"
+    directory = Path.cwd()
+    files = listdir(directory)
+    pictures = filter(lambda x: x.startswith('pictures.'), files)
+    pictures = list(pictures)
+    print(pictures)
+    # print(first)
+    for i in range(0, len(pictures)):
+        first = pictures[i]
+        p = (str(directory) + '/' + first)
+        p = Path(p)
+        print(p)
+        files = listdir(p)
+        name = pictures[i].replace('pictures.', 'frames.')
+        print(name)
+        FILENAME = "{id}.csv".format(id=name)
+        PredictSet = list()
 
-    im = im.convert("P")
+        count = 1
+        for f in p.glob('*.jpg'):
 
-    temp = {}
-
-    for x in range(im.size[1]):
-        for y in range(im.size[0]):
-            pix = im.getpixel((y, x))
-            temp[pix] = pix
-            if pix == 0:  # these are the numbers to get
-                im2.putpixel((y, x), 0)
-
-    text = pytesseract.image_to_string(im2)
-    print(text)
-    text = text.replace('\n', '_')
-    text = text.replace(':', '.')
-    text = text.replace(' ', '_')
-    remove = text[0:text.find('_') + 1:1]
-    text = text.replace(remove, '')
-    remove = text[0:text.find('_') + 1:1]
-    text = text.replace(remove, '')
-    if (text.find('.') == 1):
-        text = '0' + text
-    return text
-place="9013-423(1)"
-directory = Path.cwd()
-files = os.listdir(directory)
-pictures = filter(lambda x: x.startswith('frames.'+place), files)
-count=0
-for file in pictures:
-    if count==0 :
-        first=file
-        break
-print(first)
-idplace,date_old,num_file=parser_date(first)
-FILENAME = "{id}.csv".format(id=first)
-PredictSet=list()
-model = YOLO()
-p = (str(directory) + '/' + file)
-p = Path(p)
-print(p)
-for f in p.glob('*.jpg'):
-
-
-        try:
-            imgs = cv2.imread(str(f))
-            img=Image.fromarray(imgs)
-            date=get_datetime(img)
-        except AttributeError:
-                happy=False
+            try:
+                imgs = imread(str(f))
+                date = files[count]
+                date = date.replace('frame.', '')
+                date = date.replace('.jpg', '')
+                idplace, date, time = parser_csv(date)
+                img = Image.fromarray(imgs)
+                count += 1
+            except AttributeError:
                 break
-        out = model.detect_image(img)
-        detect=get_client(out)
-        print(detect)
-        idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
-        idplace = idplace.replace('_', '')
+            except IndexError:
+                break
+            out = model.detect_image(img)
+            detect = get_client(out)
+            print(detect)
+            PredictSet.append([idplace, date, time, detect])
 
-        PredictSet.append([idplace, date, detect])
-model.close_session()
-with open(FILENAME, "w", newline="") as file:
-    writer = csv.writer(file)
-    writer.writerows(PredictSet)
-    print("Created csv file")
+        with open(FILENAME, "w", newline="") as file:
+            writ = writer(file)
+            writ.writerows(PredictSet)
+            print("Created csv file")
+    model.close_session()
+    return 0
+main()
