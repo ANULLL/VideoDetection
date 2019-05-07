@@ -19,15 +19,13 @@ def get_datetime (img):
 
     text = pytesseract.image_to_string(im2)
     print(text)
-    text = text.replace('\n', '_')
+    remove = text[0:text.find('\n') + 1:1]
+    text=text.replace(remove,'')
     text = text.replace(':', '.')
-    text = text.replace(' ', '_')
-    remove = text[0:text.find('_') + 1:1]
-    text = text.replace(remove, '')
-    remove = text[0:text.find('_') + 1:1]
-    text = text.replace(remove, '')
+    text=text.replace(' ','_')
     if (text.find('.') == 1):
         text = '0' + text
+    print(text)
     return text
 def parser_time(f):
     from datetime import time
@@ -50,9 +48,31 @@ def parser_date(f):
     year = data[6:10:1]
     d = date(int(year),int(month),int(day))
     return idplace,d,data
+def filter_time(f):
+  from datetime import time
+  b=True
+  hour = f[0:2:1]
+  minute = f[3:5:1]
+  second = f[6:8:1]
+  try:
+    d = time(int(hour), int(minute), int(second))
+  except ValueError:
+    b=False
+  return b
+def filter_date(f):
+  from datetime import date
+  b=True
+  day = f[9:11:1]
+  month = f[12:14:1]
+  year = f[15:len(f):1]
+  try:
+    d = date(int(year), int(month), int(day))
+  except ValueError:
+    b=False
+  return b
 def nn_filter (n_file):
     b=False
-    if(n_file[0]=='0' and len(n_file)==19):
+    if(n_file[0]=='0' and len(n_file)==19 and filter_date(n_file) and filter_time(n_file)):
         b=True
     return b
 def main():
