@@ -43,6 +43,8 @@ def get_datetime (img):
     text=text.replace(' ','_')
     if (text.find('.') == 1):
         text = '0' + text
+    text=text.replace(',','.') #для грязных предиктов
+    text=text[0:19:1]
     print(text)
     return text
 def parser_time(f):
@@ -80,9 +82,11 @@ def filter_time(f):
 def filter_date(f):
   from datetime import date
   b=True
+  #f=f[0:19:1]# отрезаем хвост до года, если он есть
   day = f[9:11:1]
   month = f[12:14:1]
-  year = f[15:len(f):1]
+  #year = f[15:len(f):1]
+  year = f[15:19:1]
   try:
     d = date(int(year), int(month), int(day))
   except ValueError:
@@ -91,8 +95,8 @@ def filter_date(f):
 def nn_filter (n_file):
     b=False
     try:
-        #if(n_file[0]=='0' and len(n_file)==19 and filter_date(n_file) and filter_time(n_file)):
         if (len(n_file) == 19 and filter_date(n_file) and filter_time(n_file)):
+        #if (filter_date(n_file) and filter_time(n_file)):
             b=True
     except IndexError:
         b=False
@@ -139,6 +143,8 @@ def main():
 
             print('Read a new frame: ', success)
             if (nn_filter(n_file)):
+                #n_file=n_file[0:19:1]
+                #print(n_file)
                 imwrite('pictures{id}/frame{time}.jpg'.format(id='.' + idplace + str(date) + '_' + str(num_dir),
                                                                   time='.' + idplace + str(n_file)), image)
             i += 1
