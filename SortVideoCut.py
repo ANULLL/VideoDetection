@@ -1,10 +1,18 @@
-from PIL import Image,ImageOps
+from PIL import Image,ImageOps,ImageFilter
 import pytesseract
+#import tesserocr
 def get_datetime (img):
+
+    from tempfile import mkdtemp,tempdir
+    from os import rmdir
     im = img
+    #im=im.filter(ImageFilter.UnsharpMask(radius=2,percent=150,threshold=3))
+    #im = im.resize((500, 300)) # testing
+    im = im.resize((int(im.size[0]*0.8),int(im.size[1]*0.8)))
+    print("Size -",int(im.size[0]*0.8),' * ',int(im.size[1]*0.8))
     im = ImageOps.invert(im)
     im = im.convert("P")
-    im2 = Image.new("P", im.size, 255)
+    im2 = Image.new("L", im.size, 255)
 
     im = im.convert("P")
 
@@ -17,7 +25,17 @@ def get_datetime (img):
             if pix == 0:  # these are the numbers to get
                 im2.putpixel((y, x), 0)
 
-    text = pytesseract.image_to_string(im2)
+    td = mkdtemp()
+    tempdir = td
+    try:
+
+    #api.SetImage(im2)
+    #text=api.GetUTF8Text()
+        #text = pytesseract.image_to_string(im2,lang=None,config='-c tessedit_char_whitelist=0123456789')
+        text = pytesseract.image_to_string(im2, lang=None, config='digits')
+    finally:
+        rmdir(td)
+        tempdir = None
     print(text)
     remove = text[0:text.find('\n') + 1:1]
     text=text.replace(remove,'')
@@ -72,14 +90,19 @@ def filter_date(f):
   return b
 def nn_filter (n_file):
     b=False
-    if(n_file[0]=='0' and len(n_file)==19 and filter_date(n_file) and filter_time(n_file)):
-        b=True
+    try:
+        #if(n_file[0]=='0' and len(n_file)==19 and filter_date(n_file) and filter_time(n_file)):
+        if (len(n_file) == 19 and filter_date(n_file) and filter_time(n_file)):
+            b=True
+    except IndexError:
+        b=False
     return b
 def main():
     from cv2 import VideoCapture,CAP_PROP_FPS,CAP_PROP_POS_FRAMES,imwrite
     from pathlib import Path
     from os import listdir,mkdir
     pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+    #api = tesserocr.PyTessBaseAPI(path='C:\\Program Files\\Tesseract-OCR\\tessdata')
     directory = Path.cwd()
     files = listdir(directory)
     videos = filter(lambda x: x.endswith('.avi'), files)
@@ -119,5 +142,6 @@ def main():
                 imwrite('pictures{id}/frame{time}.jpg'.format(id='.' + idplace + str(date) + '_' + str(num_dir),
                                                                   time='.' + idplace + str(n_file)), image)
             i += 1
+    #api.End()
     return 0
 main()

@@ -70,3 +70,4 @@ def main():
     model.close_session()
     return 0
 main()
+#D:\Новая папка\ПРОЕКТ\vvb_video_audit_project\YOLO_UI\bin\Debug\input_video — копия\ВСП 010

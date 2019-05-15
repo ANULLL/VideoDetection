@@ -46,7 +46,10 @@ def main():
         countF = 0
         with open(FILENAME, "r", newline="") as file:
             read = reader(file)
-            begin_time = parser_time(row[2])
+            try:
+                begin_time = parser_time(row[2])
+            except UnboundLocalError:
+                break
             for row in read:
                 # print(row[2], " - ", row[3])
                 time = parser_time(row[2])
