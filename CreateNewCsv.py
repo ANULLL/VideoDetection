@@ -7,16 +7,10 @@ def parser_date(f):
     year=data[0:4:1]
     month=data[5:7:1]
     day=data[8:10:1]
-    #day = data[0:2:1]
-    #month = data[3:5:1]
-    #year = data[6:10:1]
     d = date(int(year),int(month),int(day))
     return idplace,d,data
 def parser_time(f):
     from datetime import time
-    #i=f.find('_')+1
-    #j=len(f)
-    #data=f[i:j:1]
     hour=f[0:2:1]
     minute=f[3:5:1]
     second=f[6:8:1]

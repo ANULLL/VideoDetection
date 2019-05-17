@@ -16,6 +16,7 @@ def main():
             for row in read:
                 element = row[1]
                 DataSet.append([row[0], row[1], row[2], row[3]])
+        DataSet[1].sort()
         score=0
         score_elem=element
         now_score_elem=element
@@ -32,7 +33,8 @@ def main():
                 else:
                     now_score+=1
                     now_score_elem=next_elem
-            if (now_score>score and score_elem !=now_score_elem ):
+            #if (now_score>score and score_elem !=now_score_elem ):
+            if (now_score > score ):
                  score=now_score
                  score_elem=now_score_elem
                  now_score=0

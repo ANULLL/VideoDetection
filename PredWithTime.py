@@ -16,7 +16,18 @@ def parser_csv (f):
     data = f[i:j:1]
     time=data[0:8:1]
     data=data[9:len(data):1]
-    return idplace,data,time
+    return time
+def parser_date(f):
+    from datetime import date
+    i = f.find('_') + 1
+    j = len(f)
+    idplace=f[0:i:1]
+    data = f[i:j:1]
+    year=data[0:4:1]
+    month=data[5:7:1]
+    day=data[8:10:1]
+    d = date(int(year),int(month),int(day))
+    return idplace,d
 def main():
     from cv2 import imread
     from yolo import YOLO
@@ -41,6 +52,8 @@ def main():
         name = pictures[i].replace('pictures.', 'frames.')
         print(name)
         FILENAME = "{id}.csv".format(id=name)
+        name=name.replace('frames.','')
+        idplace, us_date = parser_date(name)
         PredictSet = list()
 
         count = 1
@@ -51,7 +64,7 @@ def main():
                 date = files[count]
                 date = date.replace('frame.', '')
                 date = date.replace('.jpg', '')
-                idplace, date, time = parser_csv(date)
+                time = parser_csv(date) # заглушка для предиктов с годом и датой
                 img = Image.fromarray(imgs)
                 count += 1
             except AttributeError:
@@ -61,7 +74,7 @@ def main():
             out = model.detect_image(img)
             detect = get_client(out)
             print(detect)
-            PredictSet.append([idplace, date, time, detect])
+            PredictSet.append([idplace, us_date, time, detect])
 
         with open(FILENAME, "w", newline="") as file:
             writ = writer(file)

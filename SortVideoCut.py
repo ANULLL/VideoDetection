@@ -7,7 +7,6 @@ def get_datetime (img):
     from os import rmdir
     im = img
     #im=im.filter(ImageFilter.UnsharpMask(radius=2,percent=150,threshold=3))
-    #im = im.resize((500, 300)) # testing
     im = im.resize((int(im.size[0]*0.8),int(im.size[1]*0.8)))
     print("Size -",int(im.size[0]*0.8),' * ',int(im.size[1]*0.8))
     im = ImageOps.invert(im)
