@@ -1,5 +1,4 @@
 import cv2
-import matplotlib.pyplot as plt
 import os
 import datetime as dt
 from pathlib import Path
@@ -42,7 +41,7 @@ def parser_date(f):
 # path to video files
 directory=Path.cwd()
 files = os.listdir(directory)
-videos = filter(lambda x: x.endswith('.mp4'), files)
+videos = filter(lambda x: x.endswith('.avi'), files)
 num_file=0
 for file in videos:
     i=0

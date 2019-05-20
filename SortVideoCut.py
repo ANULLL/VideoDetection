@@ -8,7 +8,7 @@ def get_datetime (img):
     im = img
     #im=im.filter(ImageFilter.UnsharpMask(radius=2,percent=150,threshold=3))
     im = im.resize((int(im.size[0]*0.8),int(im.size[1]*0.8)))
-    print("Size -",int(im.size[0]*0.8),' * ',int(im.size[1]*0.8))
+   # print("Size -",int(im.size[0]*0.8),' * ',int(im.size[1]*0.8))
     im = ImageOps.invert(im)
     im = im.convert("P")
     im2 = Image.new("L", im.size, 255)
@@ -35,7 +35,7 @@ def get_datetime (img):
     finally:
         rmdir(td)
         tempdir = None
-    print(text)
+    #print(text)
     remove = text[0:text.find('\n') + 1:1]
     text=text.replace(remove,'')
     text = text.replace(':', '.')
@@ -100,6 +100,57 @@ def nn_filter (n_file):
     except IndexError:
         b=False
     return b
+def cutPred():
+    from cv2 import VideoCapture,CAP_PROP_FPS,CAP_PROP_POS_FRAMES,imwrite
+    from pathlib import Path
+    from os import listdir,mkdir
+    pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+    #api = tesserocr.PyTessBaseAPI(path='C:\\Program Files\\Tesseract-OCR\\tessdata')
+    directory = Path.cwd()
+    files = listdir(directory)
+    videos = filter(lambda x: x.endswith('.avi'), files)
+    num_file = 0
+    for file in videos:
+        i = 0
+        print(file)
+        idplace, date, num_file = parser_date(file)
+        #print(idplace + str(date))
+        num_dir = num_file = parser_time(num_file)
+        num_dir = str(num_dir)
+        num_dir = num_dir.replace(':', '.')
+        vidcap = VideoCapture(file)
+        success, image = vidcap.read()
+        fps = int(vidcap.get(CAP_PROP_FPS))
+        #print(fps)
+        success = True
+        # определим имя директории, которую создаём
+        path = 'pictures{id}'.format(id='.' + idplace + str(date) + '_' + str(num_dir))
+
+        try:
+            mkdir(path)
+        except OSError:
+            #print("Создать директорию %s не удалось" % path)
+            printed="Создать директорию %s не удалось" % path
+            print(printed)
+        else:
+            #print("Успешно создана директория %s " % path)
+            printed="Успешно создана директория %s " % path
+            print(printed)
+        while success:
+            vidcap.set(CAP_PROP_POS_FRAMES, i * fps)
+            success, image = vidcap.read()
+            try:
+                n_file = get_datetime(Image.fromarray(image))
+            except AttributeError:
+                break
+
+            print('Read a new frame: ', success)
+            if (nn_filter(n_file)):
+                #n_file=n_file[0:19:1]
+                #print(n_file)
+                imwrite('pictures{id}/frame{time}.jpg'.format(id='.' + idplace + str(date) + '_' + str(num_dir),
+                                                                  time='.' + idplace + str(n_file)), image)
+            i += 1
 def main():
     from cv2 import VideoCapture,CAP_PROP_FPS,CAP_PROP_POS_FRAMES,imwrite
     from pathlib import Path
@@ -114,14 +165,14 @@ def main():
         i = 0
         print(file)
         idplace, date, num_file = parser_date(file)
-        print(idplace + str(date))
+        #print(idplace + str(date))
         num_dir = num_file = parser_time(num_file)
         num_dir = str(num_dir)
         num_dir = num_dir.replace(':', '.')
         vidcap = VideoCapture(file)
         success, image = vidcap.read()
         fps = int(vidcap.get(CAP_PROP_FPS))
-        print(fps)
+        #print(fps)
         success = True
         # определим имя директории, которую создаём
         path = 'pictures{id}'.format(id='.' + idplace + str(date) + '_' + str(num_dir))
@@ -129,9 +180,13 @@ def main():
         try:
             mkdir(path)
         except OSError:
-            print("Создать директорию %s не удалось" % path)
+            #print("Создать директорию %s не удалось" % path)
+            printed="Создать директорию %s не удалось" % path
+            print(printed)
         else:
-            print("Успешно создана директория %s " % path)
+            #print("Успешно создана директория %s " % path)
+            printed="Успешно создана директория %s " % path
+            print(printed)
         while success:
             vidcap.set(CAP_PROP_POS_FRAMES, i * fps)
             success, image = vidcap.read()
@@ -149,4 +204,5 @@ def main():
             i += 1
     #api.End()
     return 0
-main()
+if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
+    main()  # то запускаем функцию main()
