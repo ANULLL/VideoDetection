@@ -1,5 +1,6 @@
 from PIL import Image,ImageOps,ImageFilter
 import pytesseract
+import os
 #import tesserocr
 def get_datetime (img):
 
@@ -100,15 +101,22 @@ def nn_filter (n_file):
     except IndexError:
         b=False
     return b
-def cutPred():
+def cutPred(pathFile=None):
     from cv2 import VideoCapture,CAP_PROP_FPS,CAP_PROP_POS_FRAMES,imwrite
     from pathlib import Path
     from os import listdir,mkdir
     pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
     #api = tesserocr.PyTessBaseAPI(path='C:\\Program Files\\Tesseract-OCR\\tessdata')
-    directory = Path.cwd()
-    files = listdir(directory)
-    videos = filter(lambda x: x.endswith('.avi'), files)
+    if pathFile is None:
+        directory = Path.cwd()
+        files = listdir(directory)
+        videos = filter(lambda x: x.endswith('.avi'), files)
+    else:
+        files = os.path.basename(pathFile)
+        print(files)
+        #videos = filter(lambda x: x.endswith('.avi'), files)
+        videos=[files]
+        print(videos)
     num_file = 0
     for file in videos:
         i = 0
@@ -118,7 +126,10 @@ def cutPred():
         num_dir = num_file = parser_time(num_file)
         num_dir = str(num_dir)
         num_dir = num_dir.replace(':', '.')
-        vidcap = VideoCapture(file)
+        if pathFile is None:
+            vidcap = VideoCapture(file)
+        else:
+            vidcap=VideoCapture(pathFile)
         success, image = vidcap.read()
         fps = int(vidcap.get(CAP_PROP_FPS))
         #print(fps)
@@ -151,15 +162,20 @@ def cutPred():
                 imwrite('pictures{id}/frame{time}.jpg'.format(id='.' + idplace + str(date) + '_' + str(num_dir),
                                                                   time='.' + idplace + str(n_file)), image)
             i += 1
-def main():
+def main(pathFile=None):
     from cv2 import VideoCapture,CAP_PROP_FPS,CAP_PROP_POS_FRAMES,imwrite
     from pathlib import Path
     from os import listdir,mkdir
     pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
     #api = tesserocr.PyTessBaseAPI(path='C:\\Program Files\\Tesseract-OCR\\tessdata')
-    directory = Path.cwd()
-    files = listdir(directory)
-    videos = filter(lambda x: x.endswith('.avi'), files)
+    if pathFile is None:
+        directory = Path.cwd()
+        files = listdir(directory)
+        videos = filter(lambda x: x.endswith('.avi'), files)
+    else:
+        directory=pathFile
+        files = listdir(directory)
+        videos = filter(lambda x: x.endswith('.avi'), files)
     num_file = 0
     for file in videos:
         i = 0

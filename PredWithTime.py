@@ -28,6 +28,59 @@ def parser_date(f):
     day=data[8:10:1]
     d = date(int(year),int(month),int(day))
     return idplace,d
+def timePred():
+    from cv2 import imread
+    from yolo import YOLO
+    from os import listdir
+    from pathlib import Path
+    from csv import writer
+    from PIL import Image
+    model = YOLO()
+    # place="9013-423"
+    directory = Path.cwd()
+    files = listdir(directory)
+    pictures = filter(lambda x: x.startswith('pictures.'), files)
+    pictures = list(pictures)
+    print(pictures)
+    # print(first)
+    for i in range(0, len(pictures)):
+        first = pictures[i]
+        p = (str(directory) + '/' + first)
+        p = Path(p)
+        print(p)
+        files = listdir(p)
+        name = pictures[i].replace('pictures.', 'frames.')
+        print(name)
+        FILENAME = "{id}.csv".format(id=name)
+        name = name.replace('frames.', '')
+        idplace, us_date = parser_date(name)
+        PredictSet = list()
+
+        count = 1
+        for f in p.glob('*.jpg'):
+
+            try:
+                imgs = imread(str(f))
+                date = files[count]
+                date = date.replace('frame.', '')
+                date = date.replace('.jpg', '')
+                time = parser_csv(date)  # заглушка для предиктов с годом и датой
+                img = Image.fromarray(imgs)
+                count += 1
+            except AttributeError:
+                break
+            except IndexError:
+                break
+            out = model.detect_image(img)
+            detect = get_client(out)
+            print(detect)
+            PredictSet.append([idplace, us_date, time, detect])
+
+        with open(FILENAME, "w", newline="") as file:
+            writ = writer(file)
+            writ.writerows(PredictSet)
+            print("Created csv file")
+    model.close_session()
 def main():
     from cv2 import imread
     from yolo import YOLO
@@ -82,5 +135,7 @@ def main():
             print("Created csv file")
     model.close_session()
     return 0
-main()
+#main()
+if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
+    main()  # то запускаем функцию main()
 #D:\Новая папка\ПРОЕКТ\vvb_video_audit_project\YOLO_UI\bin\Debug\input_video — копия\ВСП 010
