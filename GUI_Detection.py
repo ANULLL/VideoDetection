@@ -11,7 +11,27 @@ def predictScript(pathFile=None):
    # global out
     out=Realease.prediction(pathFile)
     print(out)
+def expFunc(pathFile=None):
+    #pathFile=easygui.fileopenbox(filetypes=["*.avi"])
+    pathFile=easygui.fileopenbox(msg='Please choose a AVI file',default='', filetypes=['*.avi'],multiple=False)
+    if pathFile is not None:
+        try:
+            out=Realease.prediction(pathFile)
+            print(out)
+        except ValueError:
+            print("Wrong file or file name")
+    else:
+        print("None selected files")
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
 
+        msg.setText("None selected files")
+        #msg.setInformativeText("This is additional information")
+        msg.setWindowTitle("Error")
+        #msg.setDetailedText("The details are as follows:")
+        #msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+        #msg.buttonClicked.connect(msgbtn)
+        msg.exec_()
 
 
 class ExampleApp(QtWidgets.QMainWindow, design1.Ui_MainWindow):
@@ -22,15 +42,16 @@ class ExampleApp(QtWidgets.QMainWindow, design1.Ui_MainWindow):
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.StartBut.clicked.connect(self.thPredict) # обработчик нажатия на кнопку
         self.ExitBut.clicked.connect(self.exitScript)
+        self.FileBut.clicked.connect(self.explScript)
         self.setWindowIcon(QtGui.QIcon('sber.jpg'))
 
 
     def thPredict(self):
         self.StartBut.setEnabled(False)
+        self.FileBut.setEnabled(False)
         t=threading.Thread(target=predictScript)
         #t=multiprocessing.Process(target=predictScript)
         t.setDaemon(True)
-        #t.run()
         t.start()
         #t.join()
         #res=t.join()
@@ -42,23 +63,24 @@ class ExampleApp(QtWidgets.QMainWindow, design1.Ui_MainWindow):
                 #self.listWidget.addItem(res)
          #      t.kill()
 
-    def exitScript(self):
-        #sys.exit()
-        file = easygui.fileopenbox(filetypes=["*.avi","*.mp4"])
-        print(file)
-        t = threading.Thread(target=predictScript(file))
-        # t=multiprocessing.Process(target=predictScript)
+    def explScript(self):
+        self.StartBut.setEnabled(False)
+        self.FileBut.setEnabled(False)
+        t = threading.Thread(target=expFunc)
+        #t=multiprocessing.Process(target=predictScript)
         t.setDaemon(True)
-        # t.run()
         t.start()
+        #t.join()
+    def exitScript(self):
+        sys.exit()
         #exit()
-def main():
+def starApp():
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
     window = ExampleApp()  # Создаём объект класса ExampleApp
     window.show()  # Показываем окно
     app.exec_()  # и запускаем приложение
-    #mainThread=threading.Thread(target=app.exec())
-    #mainThread.setDaemon(True)
-    #mainThread.start()
+def main():
+    mainThread=multiprocessing.Process(target=starApp())
+    mainThread.start()
 if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
     main()  # то запускаем функцию main()

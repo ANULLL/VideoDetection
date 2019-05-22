@@ -33,6 +33,9 @@ class Ui_MainWindow(object):
         self.StartBut = QtWidgets.QPushButton(self.centralwidget)
         self.StartBut.setObjectName("StartBut")
         self.horizontalLayout_3.addWidget(self.StartBut)
+        self.FileBut = QtWidgets.QPushButton(self.centralwidget)
+        self.FileBut.setObjectName("FileBut")
+        self.horizontalLayout_3.addWidget(self.FileBut)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem)
         self.ExitBut = QtWidgets.QPushButton(self.centralwidget)
@@ -48,6 +51,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "VideoDetection"))
         self.StartBut.setText(_translate("MainWindow", "Start"))
+        self.FileBut.setText(_translate("MainWindow", "Explorer"))
         self.ExitBut.setText(_translate("MainWindow", "Exit"))
 
 
