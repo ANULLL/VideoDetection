@@ -1,4 +1,4 @@
-def parser_date(f):
+def parser_date(f): # возвращает дату из формата год(четыре цифры)/месяц/лень
     from datetime import date
     i = f.find('_') + 1
     j = len(f)
@@ -9,14 +9,14 @@ def parser_date(f):
     day=data[8:10:1]
     d = date(int(year),int(month),int(day))
     return idplace,d,data
-def parser_time(f):
+def parser_time(f):#возвращает время из строки
     from datetime import time
     hour=f[0:2:1]
     minute=f[3:5:1]
     second=f[6:8:1]
     d=time(int(hour),int(minute),int(second))
     return d
-def csvPred():
+def csvPred():# из посекундного файла формирует файл по минутам с предсказаниями
     from pathlib import Path
     from os import listdir
     from csv import writer,reader
@@ -24,7 +24,7 @@ def csvPred():
     files = listdir(directory)
     TextFiles = filter(lambda x: x.startswith('frames.'), files)
     textFiles = list(filter(lambda x: x.endswith('.csv'), TextFiles))
-    print(textFiles)
+    print(textFiles) # получаем список всех посекундных csv файлов
 
     for i in range(0, len(textFiles)):
         file_first = textFiles[i]
@@ -74,7 +74,7 @@ def csvPred():
             writ = writer(file)
             writ.writerows(DataSet)
             print("Created csv file")
-def main():
+def main(): # аналогично предыдущей функции
     from pathlib import Path
     from os import listdir
     from csv import writer,reader

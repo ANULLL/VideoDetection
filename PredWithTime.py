@@ -1,4 +1,4 @@
-def get_client (pred):
+def get_client (pred):# проверяет сколько людей обнаружила нейросеть, делает в зависимости от этого предсказание
     count=0
     i=0
     while (i<len(pred) and count<2 ):
@@ -9,7 +9,7 @@ def get_client (pred):
         return True #клиент/клиенты есть в кадре
     else :
         return False # в кадре только оператор или нет людей
-def parser_csv (f):
+def parser_csv (f): #вытаскивает из csv айла время
     i = f.find('_') + 1
     j = len(f)
     idplace = f[0:i-1:1]
@@ -17,7 +17,7 @@ def parser_csv (f):
     time=data[0:8:1]
     data=data[9:len(data):1]
     return time
-def parser_date(f):
+def parser_date(f): # вытаскивает место и дату из имени файла
     from datetime import date
     i = f.find('_') + 1
     j = len(f)
@@ -28,19 +28,20 @@ def parser_date(f):
     day=data[8:10:1]
     d = date(int(year),int(month),int(day))
     return idplace,d
-def timePred():
+def timePred(): #находит папку с изображениями и делает для них предсказания с помощью YOLO
+                #записывает результаты по секундам в csv файл
     from cv2 import imread
     from yolo import YOLO
     from os import listdir
     from pathlib import Path
     from csv import writer
     from PIL import Image
-    model = YOLO()
+    model = YOLO() # иницилизирует модель
     # place="9013-423"
     directory = Path.cwd()
     files = listdir(directory)
     pictures = filter(lambda x: x.startswith('pictures.'), files)
-    pictures = list(pictures)
+    pictures = list(pictures) # список всех директорий в которых лежат изображения
     print(pictures)
     # print(first)
     for i in range(0, len(pictures)):
@@ -51,16 +52,16 @@ def timePred():
         files = listdir(p)
         name = pictures[i].replace('pictures.', 'frames.')
         print(name)
-        FILENAME = "{id}.csv".format(id=name)
+        FILENAME = "{id}.csv".format(id=name) # по имени папки формируем имя будущего csv файла , но с другим началом в качестве ключа
         name = name.replace('frames.', '')
         idplace, us_date = parser_date(name)
         PredictSet = list()
 
         count = 1
-        for f in p.glob('*.jpg'):
+        for f in p.glob('*.jpg'):# проходим во всех .jpg изображениям в папке
 
             try:
-                imgs = imread(str(f))
+                imgs = imread(str(f)) # считываем картинки по порядку
                 date = files[count]
                 date = date.replace('frame.', '')
                 date = date.replace('.jpg', '')
@@ -74,14 +75,14 @@ def timePred():
             out = model.detect_image(img)
             detect = get_client(out)
             print(detect)
-            PredictSet.append([idplace, us_date, time, detect])
+            PredictSet.append([idplace, us_date, time, detect]) # Формируем построчный список для csv файла
 
-        with open(FILENAME, "w", newline="") as file:
+        with open(FILENAME, "w", newline="") as file: # записываем весь список в csv файлик
             writ = writer(file)
             writ.writerows(PredictSet)
             print("Created csv file")
-    model.close_session()
-def main():
+    model.close_session() # выгружаем из оперативной памяти YOLO
+def main(): # налогично предыдущей функции, но сработает при запуске скрипта отдельно
     from cv2 import imread
     from yolo import YOLO
     from os import listdir

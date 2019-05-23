@@ -6,10 +6,10 @@ import Realease
 import multiprocessing
 import os
 import easygui
-
+import time
 def predictScript(pathFile=None):
-   # global out
-    out=Realease.prediction(pathFile)
+    # global out
+    out = Realease.prediction(pathFile)
     print(out)
 def expFunc(pathFile=None):
     #pathFile=easygui.fileopenbox(filetypes=["*.avi"])
@@ -49,28 +49,35 @@ class ExampleApp(QtWidgets.QMainWindow, design1.Ui_MainWindow):
     def thPredict(self):
         self.StartBut.setEnabled(False)
         self.FileBut.setEnabled(False)
+        start_time = time.time()
         t=threading.Thread(target=predictScript)
         #t=multiprocessing.Process(target=predictScript)
-        t.setDaemon(True)
+        #t.setDaemon(True) # Иначе не завершается при нажатии кнопки Exit
         t.start()
-        #t.join()
-        #res=t.join()
-        #self.listWidget.addItem(res)
-       # while t.is_alive():
-               #res=t.join()
-               #if (res is not None):
-        #        self.StartBut.setEnabled(True)
-                #self.listWidget.addItem(res)
-         #      t.kill()
+        for th in threading.enumerate():  # ожидание всех потоков
+            if th != threading.currentThread():
+                th.join()
+                self.listWidget.addItem("--- %s seconds ---" % (time.time() - start_time))
+                self.FileBut.setEnabled(True)
+                self.StartBut.setEnabled(True)
+
 
     def explScript(self):
         self.StartBut.setEnabled(False)
         self.FileBut.setEnabled(False)
+        start_time = time.time()
         t = threading.Thread(target=expFunc)
+
         #t=multiprocessing.Process(target=predictScript)
-        t.setDaemon(True)
+        #t.setDaemon(True) # Иначе не завершается при нажатии кнопки Exit
         t.start()
-        #t.join()
+        for th in threading.enumerate():  # ожидание всех потоков
+            if th != threading.currentThread():
+                th.join()
+                self.listWidget.addItem("--- %s seconds ---" % (time.time() - start_time))
+                self.FileBut.setEnabled(True)
+                self.StartBut.setEnabled(True)
+
     def exitScript(self):
         sys.exit()
         #exit()

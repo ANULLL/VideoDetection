@@ -2,13 +2,14 @@ from PIL import Image,ImageOps,ImageFilter
 import pytesseract
 import os
 #import tesserocr
-def get_datetime (img):
+def get_datetime (img): # принимает картинку делает предсказание времени и даты с помощью tesseract
 
     from tempfile import mkdtemp,tempdir
     from os import rmdir
     im = img
     #im=im.filter(ImageFilter.UnsharpMask(radius=2,percent=150,threshold=3))
-    im = im.resize((int(im.size[0]*0.8),int(im.size[1]*0.8)))
+    im = im.resize((int(im.size[0]*0.8),int(im.size[1]*0.8))) #0.8 оставляет 80% пикселей картинке значительно ускоряет распознавание
+                                                                # можно ставить и 0,7, но уже при 0,5 сильно проигрываем в точности
    # print("Size -",int(im.size[0]*0.8),' * ',int(im.size[1]*0.8))
     im = ImageOps.invert(im)
     im = im.convert("P")
@@ -18,7 +19,7 @@ def get_datetime (img):
 
     temp = {}
 
-    for x in range(im.size[1]):
+    for x in range(im.size[1]): # получаем черно белую картинку, где черные пиксели, это все Белые пиксели в ИСХОДНОЙ картинке
         for y in range(im.size[0]):
             pix = im.getpixel((y, x))
             temp[pix] = pix
@@ -27,27 +28,27 @@ def get_datetime (img):
 
     td = mkdtemp()
     tempdir = td
-    try:
+    try: # удаляет временные файлы, немного ускоряет tesseract
 
     #api.SetImage(im2)
     #text=api.GetUTF8Text()
         #text = pytesseract.image_to_string(im2,lang=None,config='-c tessedit_char_whitelist=0123456789')
         text = pytesseract.image_to_string(im2, lang=None, config='digits')
     finally:
-        rmdir(td)
-        tempdir = None
+       rmdir(td)
+       tempdir = None
     #print(text)
-    remove = text[0:text.find('\n') + 1:1]
+    remove = text[0:text.find('\n') + 1:1] # парсинг строки с предиктом, замена символов
     text=text.replace(remove,'')
     text = text.replace(':', '.')
     text=text.replace(' ','_')
-    if (text.find('.') == 1):
+    if (text.find('.') == 1): # на камере время в формате 9.00.00, превратит его в 09.00.00 для универсальности
         text = '0' + text
     text=text.replace(',','.') #для грязных предиктов
     text=text[0:19:1]
     print(text)
-    return text
-def parser_time(f):
+    return text # возвращаем готовый предикт с датой и временем
+def parser_time(f): # выделяет из строки время в формате 09:00:00
     from datetime import time
     i=f.find('_')+1
     j=len(f)
@@ -57,7 +58,7 @@ def parser_time(f):
     second=data[6:8:1]
     d=time(int(hour),int(minute),int(second))
     return d
-def parser_date(f):
+def parser_date(f): # выделяет из строки дату в формате день/месяц/год(четыре цифры)
     from datetime import date
     i = f.find('_') + 1
     j = len(f)
@@ -68,7 +69,7 @@ def parser_date(f):
     year = data[6:10:1]
     d = date(int(year),int(month),int(day))
     return idplace,d,data
-def filter_time(f):
+def filter_time(f): # возвращает True если возможно преобразовать строку во время
   from datetime import time
   b=True
   hour = f[0:2:1]
@@ -79,10 +80,9 @@ def filter_time(f):
   except ValueError:
     b=False
   return b
-def filter_date(f):
+def filter_date(f):# возвращает True если возможно преобразовать строку в дату
   from datetime import date
   b=True
-  #f=f[0:19:1]# отрезаем хвост до года, если он есть
   day = f[9:11:1]
   month = f[12:14:1]
   #year = f[15:len(f):1]
@@ -92,7 +92,7 @@ def filter_date(f):
   except ValueError:
     b=False
   return b
-def nn_filter (n_file):
+def nn_filter (n_file): # проверка предикта нейросети на корректность по дате и времени, чтобы записать картинку
     b=False
     try:
         if (len(n_file) == 19 and filter_date(n_file) and filter_time(n_file)):
@@ -101,13 +101,15 @@ def nn_filter (n_file):
     except IndexError:
         b=False
     return b
-def cutPred(pathFile=None):
+def cutPred(pathFile=None): # нарезает видео на картинки по одному кадру в секунду, сохраняет их в названии используя предсказание
+                            #нейросети с временем и датой, если оно некорректно картинка не сохраняется
     from cv2 import VideoCapture,CAP_PROP_FPS,CAP_PROP_POS_FRAMES,imwrite
     from pathlib import Path
     from os import listdir,mkdir
-    pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe' # путь до тессеракта, может быть другим (:-
     #api = tesserocr.PyTessBaseAPI(path='C:\\Program Files\\Tesseract-OCR\\tessdata')
-    if pathFile is None:
+    if pathFile is None: #получает путь к файлу из проводника, если проводник не использовался
+                        # выполняется поиск всех .avi файлов лежащих в каталоге с проектом
         directory = Path.cwd()
         files = listdir(directory)
         videos = filter(lambda x: x.endswith('.avi'), files)
@@ -118,7 +120,7 @@ def cutPred(pathFile=None):
         videos=[files]
         print(videos)
     num_file = 0
-    for file in videos:
+    for file in videos: # для каждого найденного файла открываем его как видео и нарезаем на кадры
         i = 0
         print(file)
         idplace, date, num_file = parser_date(file)
@@ -148,7 +150,8 @@ def cutPred(pathFile=None):
             printed="Успешно создана директория %s " % path
             print(printed)
         while success:
-            vidcap.set(CAP_PROP_POS_FRAMES, i * fps)
+            vidcap.set(CAP_PROP_POS_FRAMES, i * fps) # переходим по кадрам умножаяя текущий кадр на количество кадров в секунду
+                                                    # то есть берем один кадр в секунду
             success, image = vidcap.read()
             try:
                 n_file = get_datetime(Image.fromarray(image))
@@ -162,7 +165,7 @@ def cutPred(pathFile=None):
                 imwrite('pictures{id}/frame{time}.jpg'.format(id='.' + idplace + str(date) + '_' + str(num_dir),
                                                                   time='.' + idplace + str(n_file)), image)
             i += 1
-def main(pathFile=None):
+def main(pathFile=None): # аналогично предыдущий функции, но сработает при запуске скрипта
     from cv2 import VideoCapture,CAP_PROP_FPS,CAP_PROP_POS_FRAMES,imwrite
     from pathlib import Path
     from os import listdir,mkdir
