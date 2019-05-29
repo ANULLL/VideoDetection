@@ -30,7 +30,7 @@ def parser_date(f): # вытаскивает место и дату из име�
     return idplace,d
 def timePred(): #находит папку с изображениями и делает для них предсказания с помощью YOLO
                 #записывает результаты по секундам в csv файл
-    from cv2 import imread
+    import cv2
     from yolo import YOLO
     from os import listdir
     from pathlib import Path
@@ -61,7 +61,8 @@ def timePred(): #находит папку с изображениями и де
         for f in p.glob('*.jpg'):# проходим во всех .jpg изображениям в папке
 
             try:
-                imgs = imread(str(f)) # считываем картинки по порядку
+                imgs = cv2.imread(str(f)) # считываем картинки по порядку
+                #imgs=Image.open(str(f))
                 date = files[count]
                 date = date.replace('frame.', '')
                 date = date.replace('.jpg', '')
@@ -83,7 +84,7 @@ def timePred(): #находит папку с изображениями и де
             print("Created csv file")
     model.close_session() # выгружаем из оперативной памяти YOLO
 def main(): # налогично предыдущей функции, но сработает при запуске скрипта отдельно
-    from cv2 import imread
+    import cv2
     from yolo import YOLO
     from os import listdir
     from pathlib import Path
@@ -109,12 +110,10 @@ def main(): # налогично предыдущей функции, но ср�
         name=name.replace('frames.','')
         idplace, us_date = parser_date(name)
         PredictSet = list()
-
         count = 1
         for f in p.glob('*.jpg'):
-
             try:
-                imgs = imread(str(f))
+                imgs = cv2.imread(str(f))
                 date = files[count]
                 date = date.replace('frame.', '')
                 date = date.replace('.jpg', '')
