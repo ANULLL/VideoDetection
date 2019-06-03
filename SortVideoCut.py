@@ -1,6 +1,5 @@
-from PIL import Image,ImageOps,ImageFilter
+from PIL import Image,ImageOps
 import pytesseract
-import os
 #import tesserocr
 def get_datetime (img): # принимает картинку делает предсказание времени и даты с помощью tesseract
 
@@ -72,6 +71,8 @@ def parser_date(f): # выделяет из строки дату в форма�
 def filter_time(f): # возвращает True если возможно преобразовать строку во время
   from datetime import time
   b=True
+  if ( (not f[2]=='.') or (not f[5]=='.')):
+      b=False
   hour = f[0:2:1]
   minute = f[3:5:1]
   second = f[6:8:1]
@@ -95,7 +96,8 @@ def filter_date(f):# возвращает True если возможно пре�
 def nn_filter (n_file): # проверка предикта нейросети на корректность по дате и времени, чтобы записать картинку
     b=False
     try:
-        if (len(n_file) == 19 and filter_date(n_file) and filter_time(n_file)):
+        #if (len(n_file) == 19 and filter_date(n_file) and filter_time(n_file)):
+        if(filter_time(n_file)):
         #if (filter_date(n_file) and filter_time(n_file)):
             b=True
     except IndexError:
@@ -105,7 +107,7 @@ def cutPred(pathFile=None): # нарезает видео на картинки 
                             #нейросети с временем и датой, если оно некорректно картинка не сохраняется
     from cv2 import VideoCapture,CAP_PROP_FPS,CAP_PROP_POS_FRAMES,imwrite
     from pathlib import Path
-    from os import listdir,mkdir
+    from os import listdir,mkdir,path
     pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe' # путь до тессеракта, может быть другим (:-
     #api = tesserocr.PyTessBaseAPI(path='C:\\Program Files\\Tesseract-OCR\\tessdata')
     if pathFile is None: #получает путь к файлу из проводника, если проводник не использовался
@@ -114,7 +116,7 @@ def cutPred(pathFile=None): # нарезает видео на картинки 
         files = listdir(directory)
         videos = filter(lambda x: x.endswith('.avi'), files)
     else:
-        files = os.path.basename(pathFile)
+        files = path.basename(pathFile)
         print(files)
         #videos = filter(lambda x: x.endswith('.avi'), files)
         videos=[files]

@@ -14,7 +14,10 @@ def parser_time(f):#возвращает время из строки
     hour=f[0:2:1]
     minute=f[3:5:1]
     second=f[6:8:1]
-    d=time(int(hour),int(minute),int(second))
+    try:
+        d=time(int(hour),int(minute),int(second))
+    except ValueError:
+        d=time(0,0,0)
     return d
 def csvPred():# из посекундного файла формирует файл по минутам с предсказаниями
     from pathlib import Path
@@ -68,7 +71,7 @@ def csvPred():# из посекундного файла формирует фа
                     countF = 0
         idplace, date, num_file = parser_date(file_first)
         idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
-        idplace = idplace.replace('_', '')
+        #idplace = idplace.replace('_', '')
         FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + str(begin_time.hour) + '.' + str(begin_time.minute))
         with open(FILENAME, "w", newline="") as file:
             writ = writer(file)
@@ -126,7 +129,7 @@ def main(): # аналогично предыдущей функции
                     countF = 0
         idplace, date, num_file = parser_date(file_first)
         idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
-        idplace = idplace.replace('_', '')
+        #idplace = idplace.replace('_', '')
         FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + str(begin_time.hour) + '.' + str(begin_time.minute))
         with open(FILENAME, "w", newline="") as file:
             writ = writer(file)
