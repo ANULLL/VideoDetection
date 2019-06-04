@@ -24,6 +24,13 @@ def splitter (idplace):
     id2=id2.replace('_','')
     print(id1+ '  ' + id2)
     return id1,id2
+def split_time(t):
+    res = t.split('_')
+    print(res[2])
+    r = res[2].split('.')
+    temp=r[0] + '.' + r[1]
+    print(temp)
+    return temp
 def csvPred():# из посекундного файла формирует файл по минутам с предсказаниями
     from pathlib import Path
     from os import listdir
@@ -37,6 +44,8 @@ def csvPred():# из посекундного файла формирует фа
     for i in range(0, len(textFiles)):
         file_first = textFiles[i]
         FILENAME = textFiles[i]
+        #print('File Name - ' + FILENAME)
+        reg_time = split_time(FILENAME)
         idplace, date, num_file = parser_date(file_first)
         idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
         id1, id2 = splitter(idplace)
@@ -77,7 +86,8 @@ def csvPred():# из посекундного файла формирует фа
                     minute = time.minute
                     countT = 0
                     countF = 0
-        FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + str(begin_time.hour) + '.' + str(begin_time.minute))
+        #FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + str(begin_time.hour) + '.' + str(begin_time.minute))
+        FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + reg_time)
         with open(FILENAME, "w", newline="") as file:
             writ = writer(file)
             writ.writerows(DataSet)
@@ -95,6 +105,8 @@ def main(): # аналогично предыдущей функции
     for i in range(0, len(textFiles)):
         file_first = textFiles[i]
         FILENAME = textFiles[i]
+        #print('File Name - ' + FILENAME)
+        reg_time=split_time(FILENAME)
         idplace, date, num_file = parser_date(file_first)
         idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
         id1, id2 = splitter(idplace)
@@ -135,7 +147,7 @@ def main(): # аналогично предыдущей функции
                     minute = time.minute
                     countT = 0
                     countF = 0
-        FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + str(begin_time.hour) + '.' + str(begin_time.minute))
+        FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + reg_time)
         with open(FILENAME, "w", newline="") as file:
             writ = writer(file)
             writ.writerows(DataSet)
