@@ -19,6 +19,11 @@ def parser_time(f):#возвращает время из строки
     except ValueError:
         d=time(0,0,0)
     return d
+def splitter (idplace):
+    id1,id2=idplace.split('-')
+    id2=id2.replace('_','')
+    print(id1+ '  ' + id2)
+    return id1,id2
 def csvPred():# из посекундного файла формирует файл по минутам с предсказаниями
     from pathlib import Path
     from os import listdir
@@ -32,6 +37,9 @@ def csvPred():# из посекундного файла формирует фа
     for i in range(0, len(textFiles)):
         file_first = textFiles[i]
         FILENAME = textFiles[i]
+        idplace, date, num_file = parser_date(file_first)
+        idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
+        id1, id2 = splitter(idplace)
         DataSet = list()
         with open(FILENAME, "r", newline="") as file:  ### жесткий костыль
             read = reader(file)
@@ -65,13 +73,10 @@ def csvPred():# из посекундного файла формирует фа
                     else:
                         pred = False
                     # print(countF, " + ", countT)
-                    DataSet.append([row[0], row[1], str(time.hour) + ':' + str(time.minute), pred])
+                    DataSet.append([id1,id2, row[1], str(time.hour) + ':' + str(time.minute), pred])
                     minute = time.minute
                     countT = 0
                     countF = 0
-        idplace, date, num_file = parser_date(file_first)
-        idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
-        #idplace = idplace.replace('_', '')
         FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + str(begin_time.hour) + '.' + str(begin_time.minute))
         with open(FILENAME, "w", newline="") as file:
             writ = writer(file)
@@ -85,11 +90,14 @@ def main(): # аналогично предыдущей функции
     files = listdir(directory)
     TextFiles = filter(lambda x: x.startswith('frames.'), files)
     textFiles = list(filter(lambda x: x.endswith('.csv'), TextFiles))
-    print(textFiles)
+    print(textFiles) # получаем список всех посекундных csv файлов
 
     for i in range(0, len(textFiles)):
         file_first = textFiles[i]
         FILENAME = textFiles[i]
+        idplace, date, num_file = parser_date(file_first)
+        idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
+        id1, id2 = splitter(idplace)
         DataSet = list()
         with open(FILENAME, "r", newline="") as file:  ### жесткий костыль
             read = reader(file)
@@ -123,13 +131,10 @@ def main(): # аналогично предыдущей функции
                     else:
                         pred = False
                     # print(countF, " + ", countT)
-                    DataSet.append([row[0], row[1], str(time.hour) + ':' + str(time.minute), pred])
+                    DataSet.append([id1,id2, row[1], str(time.hour) + ':' + str(time.minute), pred])
                     minute = time.minute
                     countT = 0
                     countF = 0
-        idplace, date, num_file = parser_date(file_first)
-        idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
-        #idplace = idplace.replace('_', '')
         FILENAME = "{id}.csv".format(id=idplace + str(date) + '_' + str(begin_time.hour) + '.' + str(begin_time.minute))
         with open(FILENAME, "w", newline="") as file:
             writ = writer(file)
