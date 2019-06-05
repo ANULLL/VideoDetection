@@ -46,6 +46,9 @@ def csvPred():# из посекундного файла формирует фа
         FILENAME = textFiles[i]
         #print('File Name - ' + FILENAME)
         reg_time = split_time(FILENAME)
+        regHour, regMin = reg_time.split('.')
+        regHour = int(regHour)
+        regMin = int(regMin)
         idplace, date, num_file = parser_date(file_first)
         idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
         id1, id2 = splitter(idplace)
@@ -82,7 +85,8 @@ def csvPred():# из посекундного файла формирует фа
                     else:
                         pred = False
                     # print(countF, " + ", countT)
-                    DataSet.append([id1,id2, row[1], str(time.hour) + ':' + str(time.minute), pred])
+                    if (time.hour > regHour or (time.hour == regHour and time.minute >= regMin)):
+                        DataSet.append([id1, id2, row[1], str(time.hour) + ':' + str(time.minute), pred])
                     minute = time.minute
                     countT = 0
                     countF = 0
@@ -107,6 +111,9 @@ def main(): # аналогично предыдущей функции
         FILENAME = textFiles[i]
         #print('File Name - ' + FILENAME)
         reg_time=split_time(FILENAME)
+        regHour,regMin=reg_time.split('.')
+        regHour=int(regHour)
+        regMin=int(regMin)
         idplace, date, num_file = parser_date(file_first)
         idplace = idplace.replace(idplace[0:idplace.find('.') + 1:1], '')
         id1, id2 = splitter(idplace)
@@ -143,7 +150,8 @@ def main(): # аналогично предыдущей функции
                     else:
                         pred = False
                     # print(countF, " + ", countT)
-                    DataSet.append([id1,id2, row[1], str(time.hour) + ':' + str(time.minute), pred])
+                    if (time.hour>regHour or (time.hour == regHour and time.minute>=regMin)):
+                        DataSet.append([id1,id2, row[1], str(time.hour) + ':' + str(time.minute), pred])
                     minute = time.minute
                     countT = 0
                     countF = 0
